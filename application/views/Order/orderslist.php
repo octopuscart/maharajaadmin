@@ -163,7 +163,7 @@ $this->load->view('layout/footer');
 
         setTimeout(function () {
             location.reload();
-        }, 10000);
+        }, 500000);
 
     })
 

@@ -161,6 +161,9 @@ $this->load->view('layout/footer');
 <script>
     $(function () {
 
+        setTimeout(function () {
+            location.reload();
+        }, 10000);
 
     })
 

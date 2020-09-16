@@ -102,9 +102,9 @@ $this->load->view('layout/topmenu');
                                     title:searchproduct
                                     }">
                             <div class="thumbnail">
-                                <img src="{{product.image}}" alt="..." style="height: 150px">
+                                <img src="<?php echo base_url() . "assets/product_images/";?>{{product.file_name}}" alt="..." style="height: 150px;width:100px;">
                                 <div class="caption">
-                                    <h3>{{product.title}}</h3>
+                                    <h3 style="font-size: 12px;float: left;width:100%;height: 50px;">{{product.title}}</h3>
                                     <p>
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-btn">

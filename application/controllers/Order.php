@@ -71,7 +71,7 @@ class Order extends CI_Controller {
             $cartdata = $query->result();
             $tempdata = array();
             $itemarray = array();
-          
+
             array_push($orderslistr, $value);
         }
         $data['orderslist'] = $orderslistr;
@@ -220,12 +220,12 @@ class Order extends CI_Controller {
                     case "Order Confirmed":
                         redirect("Order/orderdetails_payments/$order_key");
                         break;
-                    
-                    
+
+
                     case "Order Verifiaction":
                         redirect("Order/orderdetails_payments/$order_key?status=Pending");
                         break;
-                    
+
                     case "Order Enquiry":
                         redirect("Order/orderdetails_enquiry/$order_key");
                         break;
@@ -509,6 +509,16 @@ class Order extends CI_Controller {
 
     function order_pdf($order_id) {
         $this->Order_model->order_pdf($order_id);
+    }
+
+    function order_pdf_order_key($order_key) {
+        $order_details = $this->Order_model->getOrderDetailsV2($order_key, 'key');
+        if ($order_details) {
+            $order_id = $order_details['order_data']->id;
+            $this->Order_model->order_pdf($order_id);
+        } else {
+            redirect(SITE_URL);
+        }
     }
 
     function order_pdf_worker($order_id) {

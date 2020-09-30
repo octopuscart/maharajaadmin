@@ -208,7 +208,7 @@ class Api extends REST_Controller {
             "password" => $password,
         );
         $this->db->where('email', $email);
-        $this->db->where('password', $password);
+        $this->db->where('password2', $password);
         $query = $this->db->get('admin_users');
         $userdata = $query->row();
         if ($userdata) {

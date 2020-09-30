@@ -293,10 +293,9 @@ class Api extends REST_Controller {
     //function for product list
 
     function category_get() {
-        $cats = [65, 67, 69, 70, 71, 73];
-        $cats = [1,2,3,4,5,6,7,8];
+     
         $this->config->load('rest', TRUE);
-        $this->db->where_in("id", $cats);
+
         $query = $this->db->get("category");
         $galleryList = $query->result();
         $this->response($galleryList);

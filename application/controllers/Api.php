@@ -209,7 +209,7 @@ class Api extends REST_Controller {
         );
         $this->db->where('email', $email);
         $this->db->where('password', $password);
-        $query = $this->db->get('admin_user');
+        $query = $this->db->get('admin_users');
         $userdata = $query->row();
         if ($userdata) {
             $this->response(array("status" => "done", "userdata" => $userdata));

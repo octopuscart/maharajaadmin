@@ -278,6 +278,99 @@ class Order extends CI_Controller {
         $this->Order_model->order_mail_confirm($order_key, "");
     }
 
+    
+        public function orderRefundFnction($order_key) {
+        $order_status = $this->input->get('status');
+        $data['status'] = $order_status;
+        if ($this->user_type == 'Customer') {
+            redirect('UserManager/not_granted');
+        }
+
+
+
+
+        $order_details = $this->Order_model->getOrderDetailsV2($order_key, 'key');
+        $vendor_order_details = $this->Order_model->getVendorsOrder($order_key);
+        $data['vendor_order'] = $vendor_order_details;
+        if ($order_details) {
+            $order_id = $order_details['order_data']->id;
+
+            $this->db->set('order_seen', '1');
+            $this->db->where('id', $order_id); //set column_name and value in which row need to update
+            $this->db->update('user_order');
+
+            $data['ordersdetails'] = $order_details;
+            $data['order_key'] = $order_key;
+            $this->db->order_by('id', 'desc');
+            $this->db->where('order_id', $order_id);
+            $query = $this->db->get('user_order_status');
+            $orderstatuslist = $query->result();
+
+            $currentstatus = $orderstatuslist ? $orderstatuslist[0]->status : array();
+
+            if ($order_status) {
+                
+            } else {
+                //redirecttion
+                switch ($currentstatus) {
+                    case "Order Confirmed":
+                        redirect("Order/orderdetails_payments/$order_key");
+                        break;
+
+
+                    case "Order Verifiaction":
+                        redirect("Order/orderdetails_payments/$order_key?status=Pending");
+                        break;
+
+                    case "Order Enquiry":
+                        redirect("Order/orderdetails_enquiry/$order_key");
+                        break;
+                    case "Payment Confirmed":
+                        redirect("Order/orderdetails_shipping/$order_key");
+                        break;
+                    case "Shipped":
+                        if ($order_status == 'Delivered') {
+                            
+                        } else {
+                            redirect("Order/orderdetails/$order_key/?status=Delivered");
+                        }
+                        break;
+                    default:
+
+                        echo "";
+                }
+            }
+            //end of redirection
+
+
+
+            $data['user_order_status'] = $orderstatuslist;
+            if (isset($_POST['submit'])) {
+                $productattr = array(
+                    'c_date' => date('Y-m-d'),
+                    'c_time' => date('H:i:s'),
+                    'status' => $this->input->post('status'),
+                    'remark' => $this->input->post('remark'),
+                    'description' => $this->input->post('description'),
+                    'order_id' => $order_id
+                );
+                $this->db->insert('user_order_status', $productattr);
+                if ($this->input->post('sendmail') == TRUE) {
+                    try {
+                        $this->Order_model->order_mail($order_key, "");
+                    } catch (Exception $e) {
+                        //echo 'Message: ' . $e->getMessage();
+                    }
+                }
+                redirect("Order/orderdetails/$order_key");
+            }
+        } else {
+            redirect('/');
+        }
+        $this->load->view('Order/orderdetailsrefund', $data);
+    }
+
+    
     public function orderdetails_enquiry($order_key) {
         $order_status = $this->input->get('status');
         $data['status'] = $order_status;

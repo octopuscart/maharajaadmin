@@ -45,7 +45,7 @@ class Order extends CI_Controller {
 
     public function index() {
 
-        $date1 = date('Y-m-') . "01";
+         $date1 = date('Y-m-d', strtotime('-30 days'));
         $date2 = date('Y-m-d');
 
         $data = array();
@@ -55,6 +55,11 @@ class Order extends CI_Controller {
         $this->db->order_by('id', 'desc');
         $this->db->where('order_date between "' . $date1 . '" and "' . $date2 . '"');
         $query = $this->db->get('user_order');
+
+        $querypayment = "SELECT payment_mode, count(order_no) as count FROM `user_order` GROUP by payment_mode ORDER by count(order_no) desc";
+        $querypayment2 = $this->db->query($querypayment);
+        $paymentdata = $querypayment2->result_array();
+        $data['paymentdata'] = $paymentdata;
 
         $orderlist = $query->result();
         $orderslistr = [];
@@ -81,7 +86,7 @@ class Order extends CI_Controller {
         if ($this->user_type != 'Admin') {
             redirect('UserManager/not_granted');
         }
-        $date1 = date('Y-m-') . "01";
+         $date1 = date('Y-m-d', strtotime('-30 days'));
         $date2 = date('Y-m-d');
         if (isset($_GET['daterange'])) {
             $daterange = $this->input->get('daterange');
@@ -173,6 +178,74 @@ class Order extends CI_Controller {
         $systemlog = $query->result_array();
 
         $data['systemlog'] = $systemlog;
+        //order list            
+        $this->db->order_by('id', 'desc');
+        $this->db->where('order_date between "' . $date1 . '" and "' . $date2 . '"');
+        $query = $this->db->get('user_order');
+        $orderlist = $query->result();
+        $orderslistr = [];
+        foreach ($orderlist as $key => $value) {
+            $value->status_datetime = $value->order_date . " " . $value->order_time;
+            array_push($orderslistr, $value);
+        }
+        $data['orderslist'] = $orderslistr;
+        //end of order list
+        //order count
+        $this->db->select('count(id) as order_count');
+        $query = $this->db->get('user_order');
+        $ordercount = $query->row();
+        $data['total_order'] = $ordercount->order_count;
+
+       
+
+        //user count            
+        $this->db->select('count(id) as total_users');
+        $query = $this->db->get('admin_users');
+        $userlist = $query->row();
+        $data['total_users'] = $userlist->total_users;
+
+        //visitore count
+        $this->db->select('count(id) as total_users');
+        $query = $this->db->get('ci_sessions');
+        $userlist = $query->row();
+        $data['total_visitor'] = $userlist->total_users;
+
+        //lastest users            
+        $this->db->order_by('id', 'desc');
+        $this->db->limit(12);
+        $query = $this->db->get('admin_users');
+        $lastestuser = $query->result_array();
+        $data['latestusers'] = $lastestuser;
+
+        //system log            
+        $this->db->order_by('id', 'desc');
+        $this->db->limit(10);
+        $query = $this->db->get('system_log');
+        $systemlog = $query->result_array();
+        $data['systemlog'] = $systemlog;
+
+     
+
+        //order datess
+        $queryrawo = "SELECT order_date, count(id) as count FROM user_order where order_date between '$date1' and '$date2' group by order_date order by order_date desc";
+        $queryrawo2 = $this->db->query($queryrawo);
+        $order_dates = $queryrawo2->result_array();
+        $order_dates_array = array();
+        foreach ($order_dates as $key => $value) {
+            $order_dates_array[$value['order_date']] = $value['count'];
+        }
+        $booking_dates_array = array();
+
+        $listofdates = array();
+        for ($i = 30; $i >= 0; $i--) {
+            $tdate = date('Y-m-d', strtotime("-$i days"));
+            $listofdates[$tdate] = array(
+                "order" => isset($order_dates_array[$tdate]) ? $order_dates_array[$tdate] : 0,
+                "booking" => isset($booking_dates_array[$tdate]) ? $booking_dates_array[$tdate] : 0
+            );
+        }
+
+        $data['order_booking_date_list'] = $listofdates;
 
 
         $this->load->view('Order/dashboard', $data);
@@ -278,8 +351,7 @@ class Order extends CI_Controller {
         $this->Order_model->order_mail_confirm($order_key, "");
     }
 
-    
-        public function orderRefundFnction($order_key) {
+    public function orderRefundFnction($order_key) {
         $order_status = $this->input->get('status');
         $data['status'] = $order_status;
         if ($this->user_type == 'Customer') {
@@ -370,7 +442,6 @@ class Order extends CI_Controller {
         $this->load->view('Order/orderdetailsrefund', $data);
     }
 
-    
     public function orderdetails_enquiry($order_key) {
         $order_status = $this->input->get('status');
         $data['status'] = $order_status;

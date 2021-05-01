@@ -41,7 +41,7 @@ function truncate($str, $len) {
                 <div class="stats-icon"><i class="fa fa-pencil-square"></i></div>
                 <div class="stats-info">
                     <h4>Total Orders</h4>
-                    <p><?php echo $total_order; ?></p>	
+                    <p><?php echo count($orderslist); ?></p>	
                 </div>
                 <!--                <div class="stats-link">
                                     <a href="javascript:;">View Detail <i class="fa fa-arrow-circle-o-right"></i></a>
@@ -49,7 +49,8 @@ function truncate($str, $len) {
             </div>
         </div>
         <!-- end col-3 -->
-          <div class="col-md-3 col-sm-6">
+        <!-- begin col-3 -->
+        <div class="col-md-3 col-sm-6">
             <div class="widget widget-stats bg-purple">
                 <div class="stats-icon"><i class="fa fa-usd"></i></div>
                 <div class="stats-info">
@@ -61,6 +62,7 @@ function truncate($str, $len) {
                                 </div>-->
             </div>
         </div>
+        <!-- end col-3 -->
         <!-- begin col-3 -->
         <div class="col-md-3 col-sm-6">
             <div class="widget widget-stats bg-red">
@@ -80,7 +82,7 @@ function truncate($str, $len) {
                 <div class="stats-icon"><i class="fa fa-desktop"></i></div>
                 <div class="stats-info">
                     <h4>TOTAL VISITORS</h4>
-                    <p><?php echo $total_visitor*3; ?></p>	
+                    <p>13,203</p>	
                 </div>
                 <!--                <div class="stats-link">
                                     <a href="javascript:;">View Detail <i class="fa fa-arrow-circle-o-right"></i></a>
@@ -92,27 +94,49 @@ function truncate($str, $len) {
     <!-- begin row -->
     <div class="row">
         <!-- begin col-8 -->
-        <div class="col-md-12">
+        <div class="col-md-8">
             <div class="panel panel-inverse" data-sortable-id="index-1">
                 <div class="panel-heading">
-
-                    <h4 class="panel-title">Order Analytics (Last 30 Days)</h4>
+                    <div class="panel-heading-btn">
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-repeat"></i></a>
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
+                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
+                    </div>
+                    <h4 class="panel-title">Website Analytics (Last 7 Days)</h4>
                 </div>
                 <div class="panel-body">
-                    <div id="interactive-chart2" class="height-sm"></div>
+                    <div id="interactive-chart" class="height-sm"></div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-8">
-
-
-            <div class="panel panel-inverse" data-sortable-id="index-1">
-                <div class="panel-heading">
-
-                    <h4 class="panel-title">Order Data (Last 30 Days)</h4>
+            <ul class="nav nav-tabs nav-tabs-inverse nav-justified nav-justified-mobile" data-sortable-id="index-2">
+                <li class="active"><a href="#latest-post" data-toggle="tab"><i class="fa fa-picture-o m-r-5"></i> <span class="hidden-xs">Latest Post</span></a></li>
+                <li class=""><a href="#purchase" data-toggle="tab"><i class="fa fa-shopping-cart m-r-5"></i> <span class="hidden-xs">Purchase</span></a></li>
+            </ul>
+            <div class="tab-content" data-sortable-id="index-3">
+                <div class="tab-pane fade active in" id="latest-post">
+                    <div class="height-sm" data-scrollbar="true">
+                        <ul class="media-list media-list-with-divider">
+                            <?php
+                            foreach ($blog_data as $key => $value) {
+                                ?>   
+                                <li class="media media-lg">
+                                    <a href="javascript:;" class="pull-left">
+                                        <img class="media-object" src="<?php echo base_url(); ?>assets/blog_images/<?php echo $value['image']; ?>" alt=""  style="height:100px;width:100px"/>
+                                    </a>
+                                    <div class="media-body">
+                                        <h4 class="media-heading"><a href='<?php echo site_url('CMS/blogDetails/' . $value['id']); ?>'><?php echo truncate($value['title'], 100); ?></a></h4>
+                                        <?php echo truncate($value['description'], 200); ?>    
+                                    </div>
+                                </li>
+                                <?php
+                            }
+                            ?>
+                        </ul>
+                    </div>
                 </div>
-                <div class="panel-body">
+                <div class="tab-pane fade" id="purchase">
                     <div class="height-sm" data-scrollbar="true">
 
 
@@ -120,7 +144,7 @@ function truncate($str, $len) {
                             <thead>
                                 <tr>
                                     <th style="width: 20px">S. NO.</th>
-                                    <th style="width:200px">Order Information</th>
+                                    <th style="width:250px">Order Information</th>
                                     <th style="width:200px">Customer Information</th>
 
                                     <th>Status</th>
@@ -139,18 +163,20 @@ function truncate($str, $len) {
                                                 <?php echo $count; ?>
                                             </td>
                                             <td>
+
                                                 <table class="small_table">
                                                     <tr>
-                                                        <td>
-
-                                                            <b>#<?php echo $value->order_no; ?></b>
-                                                        </td>
+                                                        <th>Order No.</th>
+                                                        <td>: <?php echo $value->order_no; ?></td>
                                                     </tr>
                                                     <tr>
-
-                                                        <td>Amount: {{<?php echo $value->total_price; ?>|currency:" "}}</td>
+                                                        <th>Total Amount</th>
+                                                        <td>: {{<?php echo $value->total_price; ?>|currency:" "}}</td>
                                                     </tr>
-
+                                                    <tr>
+                                                        <th>Total Products</th>
+                                                        <td>: {{<?php echo $value->total_quantity; ?>}}</td>
+                                                    </tr>
                                                 </table>
 
                                             </td>
@@ -160,17 +186,16 @@ function truncate($str, $len) {
                                                 <b> <?php echo $value->name; ?></b>
                                                 <table class="small_table">
                                                     <tr>
-
+                                                        <th><i class="fa fa-envelope"></i> &nbsp; </th>
                                                         <td class="overtext"> <a href="#" title="<?php echo $value->email; ?>"><?php echo $value->email; ?></a></td>
                                                     </tr>
                                                     <tr>
-
+                                                        <th><i class="fa fa-phone"></i>  &nbsp;</th>
                                                         <td> <?php echo $value->contact_no; ?></td>
                                                     </tr>
                                                     <tr>
-
-                                                        <td> <?php echo $value->zipcode; ?>
-                                                        </td>
+                                                        <th><i class="fa fa-map-marker"></i> &nbsp; </th>
+                                                        <td> <?php echo $value->city . ", " . $value->country; ?></td>
                                                     </tr>
                                                 </table>
 
@@ -180,6 +205,7 @@ function truncate($str, $len) {
 
                                             <td>
                                                 <?php
+                                                echo "" . $value->status . "<br/>";
                                                 echo $value->status_datetime;
                                                 ?>
                                             </td>
@@ -201,12 +227,28 @@ function truncate($str, $len) {
                         </table>
                     </div>
                 </div>
+
             </div>
 
-
-
             <!-- begin col-4 -->
-
+            <div class="col-md-6">
+                <!-- begin panel -->
+                <div class="panel panel-inverse" data-sortable-id="index-10">
+                    <div class="panel-heading">
+                        <div class="panel-heading-btn">
+                            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+                            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-repeat"></i></a>
+                            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
+                            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
+                        </div>
+                        <h4 class="panel-title">Calendar</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div id="datepicker-inline" class="datepicker-full-width"><div></div></div>
+                    </div>
+                </div>
+                <!-- end panel -->
+            </div>
             <div class="col-md-6">
                 <!-- begin panel -->
                 <div class="panel panel-inverse" data-sortable-id="index-4">
@@ -219,12 +261,12 @@ function truncate($str, $len) {
                             ?>
                             <li>
                                 <a href="javascript:;">
-                                    <img src = '<?php echo base_url(); ?>assets/emoji/user.png' alt = ""  style = " width:60px;  height: 60px;background-size: cover;float: left;" />
+                                    <img src = '<?php echo base_url(); ?>assets/profile_image/<?php echo $uvalue['image']; ?>' alt = ""  style = "background: url(<?php echo base_url(); ?>assets/emoji/user.png);  width:60px;  height: 60px;background-size: cover;float: left;" />
 
                                 </a>
-                                <h4 class="username text-ellipsis" style="float: left;width: -webkit-fill-available;">
+                                <h4 class="username text-ellipsis" style="float: left;">
                                     <?php echo $uvalue['first_name']; ?> <?php echo $uvalue['last_name']; ?>
-
+                                    <small><?php echo $uvalue['country']; ?></small>
                                 </h4>
                             </li>
                             <?php
@@ -243,7 +285,7 @@ function truncate($str, $len) {
 
         </div>
         <!-- end col-8 -->
-             <!-- begin col-4 -->
+        <!-- begin col-4 -->
         <div class="col-md-4">
             <div class="panel panel-inverse" data-sortable-id="index-6">
                 <div class="panel-heading">
@@ -253,7 +295,7 @@ function truncate($str, $len) {
                         <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
                         <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
                     </div>
-                    <h4 class="panel-title">Payment Details</h4>
+                    <h4 class="panel-title">Analytics Details</h4>
                 </div>
                 <div class="panel-body p-t-0">
                     <table class="table table-valign-middle m-b-0">
@@ -389,112 +431,4 @@ if ($checklogin['show']) {
 }
 ?>
                 })
-
-
-                var handleInteractiveChart = function () {
-                    "use strict";
-                    function showTooltip(x, y, contents) {
-                        $('<div id="tooltip" class="flot-tooltip">' + contents + '</div>').css({
-                            top: y - 45,
-                            left: x - 55
-                        }).appendTo("body").fadeIn(200);
-                    }
-                    if ($('#interactive-chart2').length !== 0) {
-
-                        var data1 = [
-<?php
-$listoforderbooking = [];
-$count1 = 1;
-foreach ($order_booking_date_list as $key => $value) {
-    $orddata = $value['order'];
-    echo "[$count1, $orddata],";
-    array_push($listoforderbooking, $orddata);
-    $count1++;
-}
-?>
-                        ];
-                        var data2 = [
-<?php
-$count2 = 1;
-foreach ($order_booking_date_list as $key => $value) {
-    $bkdata = $value['booking'];
-    echo "[$count2, $bkdata],";
-    array_push($listoforderbooking, $bkdata);
-    $count2++;
-}
-?>
-                        ];
-                        var xLabel = [
-
-<?php
-$count3 = 1;
-foreach ($order_booking_date_list as $key => $value) {
-    $orgdata = date("dS M Y", strtotime($key));
-    $orgdata2 = date("d", strtotime($key));
-    if ($count3 % 3 == 0) {
-        echo "[$count3, '$orgdata'],";
-    } else {
-        echo "[$count3, '$orgdata2'],";
-    }
-    $count3++;
-}
-
-$maxdatagraph = max($listoforderbooking) * 2;
-?>
-                        ];
-                        $.plot($("#interactive-chart2"), [
-                            {
-                                data: data1,
-                                label: "Orders",
-                                color: blue,
-                                lines: {show: true, fill: false, lineWidth: 2},
-                                points: {show: true, radius: 3, fillColor: '#fff'},
-                                shadowSize: 0
-                            },
-                        ],
-                                {
-                                    xaxis: {ticks: xLabel, tickDecimals: 1, tickColor: '#ddd'},
-                                    yaxis: {ticks: 10, tickColor: '#ddd', min: 0, max: <?php echo $maxdatagraph; ?>},
-                                    grid: {
-                                        hoverable: true,
-                                        clickable: true,
-                                        tickColor: "#ddd",
-                                        borderWidth: 1,
-                                        backgroundColor: '#fff',
-                                        borderColor: '#ddd'
-                                    },
-                                    legend: {
-                                        labelBoxBorderColor: '#ddd',
-                                        margin: 10,
-                                        noColumns: 1,
-                                        show: true
-                                    }
-                                }
-                        );
-                        var previousPoint = null;
-                        $("#interactive-chart2").bind("plothover", function (event, pos, item) {
-                            $("#x").text(pos.x.toFixed(2));
-                            $("#y").text(pos.y.toFixed(2));
-                            if (item) {
-                                if (previousPoint !== item.dataIndex) {
-                                    previousPoint = item.dataIndex;
-                                    $("#tooltip").remove();
-                                    var y = item.datapoint[1].toFixed(2);
-
-                                    var content = item.series.label + " " + y;
-                                    showTooltip(item.pageX, item.pageY, content);
-                                }
-                            } else {
-                                $("#tooltip").remove();
-                                previousPoint = null;
-                            }
-                            event.preventDefault();
-                        });
-                    }
-                };
-                handleInteractiveChart();
-
-
-
-
 </script>

@@ -180,11 +180,16 @@ function truncate($str, $len) {
 
                                             <td>
                                                 <?php
+                                                echo $value->payment_mode;
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php
                                                 echo $value->status_datetime;
                                                 ?>
                                             </td>
                                             <td>
-                                                <a href="<?php echo site_url("order/orderdetails/" . $value->order_key); ?>" class="btn btn-primary btn-sm" style="    margin-top: 20%;">Update <i class="fa fa-arrow-circle-right"></i></a>
+                                                <a href="<?php echo site_url("order/orderdetails/" . $value->order_key); ?>" class="btn btn-primary btn-sm" style="    margin-top: 20%;"> <i class="fa fa-arrow-circle-right"></i></a>
                                             </td>
                                         </tr>
                                         <?php

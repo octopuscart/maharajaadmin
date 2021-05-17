@@ -599,7 +599,7 @@ class ProductManager extends CI_Controller {
                 $editionalquery = " where p.status = '0' ";
                 break;
             case "stockout":
-                $editionalquery = " where p.stock_status = 'Out of Stock' and p.status = '0'";
+                $editionalquery = " where p.stock_status = 'Out Of Stock' and p.status = '1'";
                 break;
             default:
                 $editionalquery = " where p.stock_status = 'In Stock' and p.status = '1'";

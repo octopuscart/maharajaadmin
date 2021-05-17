@@ -8,7 +8,7 @@ define('PANELVERSION', "V0.9.5.18");
 
 //Project inforamtion
 define('AUTOSKU', True);
-define('SKU_PREFIX', 'JL');
+define('SKU_PREFIX', 'MM');
 define('DEFAULT_IMAGE', 'image/default_image.jpg');
 define('GLOBAL_CURRENCY', $configuration['currency']);
 define('SITE_NAME', $configuration['site_name']);

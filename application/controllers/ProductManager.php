@@ -51,6 +51,7 @@ class ProductManager extends CI_Controller {
     }
 
     //Add Categories
+       //Add Categories
     function categories() {
         $product_model = $this->Product_model;
         $data['product_model'] = $product_model;
@@ -64,19 +65,65 @@ class ProductManager extends CI_Controller {
 
         if (isset($_POST['submit'])) {
             if ($_POST['submit'] == 'Add Category') {
+                if (!empty($_FILES['picture']['name'])) {
+
+                    $config['upload_path'] = 'assets/media';
+                    $config['allowed_types'] = '*';
+                    $temp1 = rand(100, 1000000);
+
+                    $ext1 = explode('.', $_FILES['picture']['name']);
+                    $ext = strtolower(end($ext1));
+                    $file_newname = $temp1 . "1." . $ext;
+                    $config['file_name'] = $file_newname;
+                    //Load upload library and initialize configuration
+                    $this->load->library('upload', $config);
+                    $this->upload->initialize($config);
+                    if ($this->upload->do_upload('picture')) {
+                        $uploadData = $this->upload->data();
+                        $picture = $uploadData['file_name'];
+                    } else {
+                        $picture = '';
+                    }
+                } else {
+                    $picture = '';
+                }
                 $category_array = array(
                     'category_name' => $this->input->post('category_name'),
                     'description' => $this->input->post('description'),
                     'parent_id' => $this->input->post('parent_id'),
-                    'image' => $this->input->post('image')
+                    'image' => $picture
                 );
                 $this->db->insert('category', $category_array);
             }
             if ($_POST['submit'] == 'Edit') {
+                if (!empty($_FILES['picture']['name'])) {
+
+                    $config['upload_path'] = 'assets/media';
+                    $config['allowed_types'] = '*';
+                    $temp1 = rand(100, 1000000);
+
+                    $ext1 = explode('.', $_FILES['picture']['name']);
+                    $ext = strtolower(end($ext1));
+                    $file_newname = $temp1 . "1." . $ext;
+                    $config['file_name'] = $file_newname;
+                    //Load upload library and initialize configuration
+                    $this->load->library('upload', $config);
+                    $this->upload->initialize($config);
+                    if ($this->upload->do_upload('picture')) {
+                        $uploadData = $this->upload->data();
+                        $picture = $uploadData['file_name'];
+                    } else {
+                        $picture = '';
+                    }
+                } else {
+                    $picture = '';
+                }
                 echo $id = $this->input->post('parent_id');
                 $this->db->set('category_name', $this->input->post('category_name'));
                 $this->db->set('description', $this->input->post('description'));
-                $this->db->set('image', $this->input->post('image'));
+                if ($picture) {
+                    $this->db->set('image', $picture);
+                }
                 $this->db->where('id', $id);
                 $this->db->update('category');
             }
@@ -91,6 +138,7 @@ class ProductManager extends CI_Controller {
 
         $this->load->view('productManager/categories', $data);
     }
+
 
     //Add Categories
     function categoryItems() {
@@ -319,11 +367,11 @@ class ProductManager extends CI_Controller {
                 'sale_price' => $this->input->post('sale_price'),
                 'price' => $this->input->post('price'),
                 'file_name' => $file_newname,
-                'offer'=> $this->input->post('offer'),
+                'offer' => $this->input->post('offer'),
                 'file_name1' => "",
                 'file_name2' => "",
                 'status' => 1,
-                'stock_status'=>'In Stock',
+                'stock_status' => 'In Stock',
                 'op_date_time' => $datetime,
                 'user_id' => $user_id);
 
@@ -387,14 +435,14 @@ class ProductManager extends CI_Controller {
             $this->db->update('products'); //
             redirect("ProductManager/productReport");
         }
-        
+
         if (isset($_POST['recoverdata'])) {
             $this->db->set('status', 1);
             $this->db->where('id', $product_id); //set column_name and value in which row need to update
             $this->db->update('products'); //
             redirect("ProductManager/productReport");
         }
-        
+
         if (isset($_POST['deletedata'])) {
             $this->db->where('id', $product_id); //set column_name and value in which row need to update
             $this->db->delete('products'); //
@@ -489,7 +537,7 @@ class ProductManager extends CI_Controller {
                 'regular_price' => $this->input->post('regular_price'),
                 'sale_price' => $this->input->post('sale_price'),
                 'price' => $this->input->post('price'),
-                'offer'=>$this->input->post('offer'),
+                'offer' => $this->input->post('offer'),
                 'status' => 1,
                 'stock_status' => $this->input->post('stock_status')
             );
@@ -797,6 +845,36 @@ class ProductManager extends CI_Controller {
         $data['product_model'] = $product_model;
 
         $this->load->view('productManager/productColor', $data);
+    }
+
+    function productMig() {
+        $querydata = $this->db->get("product_import");
+        $resultdata = $querydata->result_array();
+        foreach ($resultdata as $ikey => $ivalue) {
+                print_r($ivalue["sku"]);
+            echo "<br/>";
+            $this->db->where("sku", $ivalue["sku"]);
+            $this->db->set(array("video_link" => $ivalue["status"]));
+            $this->db->update("products");
+
+//            if ($ivalue["status"] == "REMOVE") {
+//                print_r($ivalue["sku"]);
+//                echo "<br/>";
+//                $this->db->where("sku", $ivalue["sku"]);
+//                $this->db->set(array("status" => "0"));
+//                $this->db->update("products");
+//            }
+            
+            
+//            if ($ivalue["status"] == "out of stock") {
+//                print_r($ivalue["sku"]);
+//                echo "<br/>";
+//                $this->db->where("sku", $ivalue["sku"]);
+//                $this->db->set(array("stock_status" => "Out Of Stock"));
+//                $this->db->update("products");
+//            }            
+            
+        }
     }
 
 }

@@ -45,7 +45,7 @@ class Order extends CI_Controller {
 
     public function index() {
 
-         $date1 = date('Y-m-d', strtotime('-30 days'));
+        $date1 = date('Y-m-d', strtotime('-30 days'));
         $date2 = date('Y-m-d');
 
         $data = array();
@@ -86,7 +86,7 @@ class Order extends CI_Controller {
         if ($this->user_type != 'Admin') {
             redirect('UserManager/not_granted');
         }
-         $date1 = date('Y-m-d', strtotime('-30 days'));
+        $date1 = date('Y-m-d', strtotime('-30 days'));
         $date2 = date('Y-m-d');
         if (isset($_GET['daterange'])) {
             $daterange = $this->input->get('daterange');
@@ -196,7 +196,7 @@ class Order extends CI_Controller {
         $ordercount = $query->row();
         $data['total_order'] = $ordercount->order_count;
 
-       
+
 
         //user count            
         $this->db->select('count(id) as total_users');
@@ -224,7 +224,7 @@ class Order extends CI_Controller {
         $systemlog = $query->result_array();
         $data['systemlog'] = $systemlog;
 
-     
+
 
         //order datess
         $queryrawo = "SELECT order_date, count(id) as count FROM user_order where order_date between '$date1' and '$date2' group by order_date order by order_date desc";
@@ -695,10 +695,11 @@ class Order extends CI_Controller {
     }
 
 //order list accroding to user type
-    public function orderslist() {
+    public function orderslist($order_status = "All") {
         $data['exportdata'] = 'yes';
         $date1 = date('Y-m-') . "01";
         $date2 = date('Y-m-d');
+        $statuslist = array();
         if (isset($_GET['daterange'])) {
             $daterange = $this->input->get('daterange');
             $datelist = explode(" to ", $daterange);
@@ -716,9 +717,12 @@ class Order extends CI_Controller {
             foreach ($orderlist as $key => $value) {
                 $this->db->order_by('id', 'desc');
                 $this->db->where('order_id', $value->id);
+                $order_status_ud = urldecode($order_status);
+
                 $query = $this->db->get('user_order_status');
                 $status = $query->row();
                 $value->status = $status ? $status->status : $value->status;
+                $statuslist[$value->status] = $value->status;
                 $value->status_datetime = $status ? $status->c_date . " " . $status->c_time : $value->order_date . " " . $value->order_time;
                 $this->db->order_by('id', 'desc');
                 $this->db->where('order_id', $value->id);
@@ -726,9 +730,15 @@ class Order extends CI_Controller {
                 $cartdata = $query->result();
                 $tempdata = array();
                 $itemarray = array();
-
-                array_push($orderslistr, $value);
+                if ($order_status_ud != "All") {
+                    if (($value->status == $order_status_ud)) {
+                        array_push($orderslistr, $value);
+                    }
+                } else {
+                    array_push($orderslistr, $value);
+                }
             }
+            $data['statuslist'] = $statuslist;
             $data['orderslist'] = $orderslistr;
             $this->load->view('Order/orderslist', $data);
         }

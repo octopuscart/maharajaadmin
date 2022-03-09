@@ -2,7 +2,9 @@
 $this->load->view('layout/header');
 $this->load->view('layout/topmenu');
 ?>
-
+<!-- ================== BEGIN PAGE LEVEL STYLE ================== -->
+<link href="<?php echo base_url(); ?>assets/plugins/DataTables/css/data-table.css" rel="stylesheet" />
+<!-- ================== END PAGE LEVEL STYLE ================== -->
 <style>
     .order_panel{
         padding: 10px;
@@ -44,6 +46,18 @@ $this->load->view('layout/topmenu');
                     $this->load->view('Order/orderdates');
                     ?>
                     <div  style="clear:both"></div>
+                    <div class="col-md-12 " style="margin: 10px 0px;">
+                        <p>Filter Order By Status</p>
+                        <a class="btn btn-inverse" href="<?php echo site_url("Order/orderslist/All"); ?>">All Status</a>
+
+                        <?php
+                        foreach ($statuslist as $key => $value) {
+                            ?>
+                            <a class="btn btn-inverse" href="<?php echo site_url("Order/orderslist/$value"); ?>"><?php echo $value; ?></a>
+                            <?php
+                        }
+                        ?>
+                    </div>
                 </div>
                 <!-- /.panel-header -->
                 <div class="panel-body">
@@ -153,60 +167,61 @@ $this->load->view('layout/topmenu');
     </div>
 </section>
 <!-- /.content -->
-
+<script src="<?php echo base_url(); ?>assets/plugins/DataTables/js/jquery.dataTables.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/table-manage-default.demo.min.js"></script>
 <?php
 $this->load->view('layout/footer');
 ?> 
 
 <script>
-    $(function () {
+$(function () {
 
-        setTimeout(function () {
-            location.reload();
-        }, 500000);
+    setTimeout(function () {
+        location.reload();
+    }, 500000);
 
+})
+
+
+$(function () {
+    $("#daterangepicker").daterangepicker({
+        format: 'YYYY-MM-DD',
+        showDropdowns: true,
+        showWeekNumbers: true,
+        timePicker: false,
+        timePickerIncrement: 1,
+        timePicker12Hour: true,
+        ranges: {
+            "Today's": [moment(), moment()],
+            "Yesterday's": [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        opens: 'right',
+        drops: 'down',
+        buttonClasses: ['btn', 'btn-sm'],
+        applyClass: 'btn-primary',
+        cancelClass: 'btn-default',
+        separator: ' to ',
+        locale: {
+            applyLabel: 'Submit',
+            cancelLabel: 'Cancel',
+            fromLabel: 'From',
+            toLabel: 'To',
+            customRangeLabel: 'Custom',
+            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            firstDay: 1
+        }
+    }, function (start, end, label) {
+        $('input[name=daterange]').val(start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+    });
+    $('#tableDataOrder').DataTable({
+        "language": {
+            "search": "Search Order By Email, Order No., Order Date Etc."
+        }
     })
-
-
-    $(function () {
-        $("#daterangepicker").daterangepicker({
-            format: 'YYYY-MM-DD',
-            showDropdowns: true,
-            showWeekNumbers: true,
-            timePicker: false,
-            timePickerIncrement: 1,
-            timePicker12Hour: true,
-            ranges: {
-                "Today's": [moment(), moment()],
-                "Yesterday's": [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            },
-            opens: 'right',
-            drops: 'down',
-            buttonClasses: ['btn', 'btn-sm'],
-            applyClass: 'btn-primary',
-            cancelClass: 'btn-default',
-            separator: ' to ',
-            locale: {
-                applyLabel: 'Submit',
-                cancelLabel: 'Cancel',
-                fromLabel: 'From',
-                toLabel: 'To',
-                customRangeLabel: 'Custom',
-                daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-                monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                firstDay: 1
-            }
-        }, function (start, end, label) {
-            $('input[name=daterange]').val(start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
-        });
-        $('#tableDataOrder').DataTable({
-            "language": {
-                "search": "Search Order By Email, Order No., Order Date Etc."
-            }
-        })
-    })
+})
 </script>

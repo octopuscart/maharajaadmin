@@ -39,6 +39,15 @@ $this->load->view('layout/topmenu');
         color: white;
         text-shadow: 0px 2px 4px #fff;
     }
+    .product_type {
+        background: #8bc34a;
+        color: white;
+        padding: 17px 5px;
+    }
+    .variant_product.product_type {
+       background: #ff9800;
+
+    }
 
 </style>
 <!-- Main content -->
@@ -47,7 +56,7 @@ $this->load->view('layout/topmenu');
 
         <div class="panel panel-inverse">
             <div class="panel-heading">
-                <h3 class="panel-title">Product Reports <?php echo $title;?></h3>
+                <h3 class="panel-title">Product Reports <?php echo $title; ?></h3>
             </div>
             <div class="panel-body">
                 <table id="tableData" class="table table-bordered ">
@@ -55,14 +64,15 @@ $this->load->view('layout/topmenu');
                         <tr>
                             <th style="width: 20px;">S.N.</th>
                             <th style="width:50px;">Image</th>
-                            <th style="width:200px;">Category</th>
+                            <th style="width:100px;">Category</th>
                             <th style="width:50px;">SKU</th>
                             <th style="width:100px;">Title</th>
 
-                            <th style="width:200px;">Short Description</th>
+                            <th style="width:100px;">Size/Qnty.</th>
 
                             <th style="width:50px;">Items Prices</th>
                             <th style="width:50px;">Stock</th>
+                            <th style="width:100px;">Variant Product Of</th>
 
                             <th style="width: 75px;">Edit</th>
                         </tr>
@@ -93,7 +103,7 @@ $this->load->view('layout/footer');
             "processing": true,
             "serverSide": true,
             "ajax": {
-                url: "<?php echo site_url("ProductManager/productReportApi/".$condition) ?>",
+                url: "<?php echo site_url("ProductManager/productReportApi/" . $condition) ?>",
                 type: 'GET'
             },
             "columns": [
@@ -102,9 +112,10 @@ $this->load->view('layout/footer');
                 {"data": "category"},
                 {"data": "sku"},
                 {"data": "title"},
-                {"data": 'short_description'},
+                {"data": 'description'},
                 {"data": "items_prices"},
                 {"data": "stock_status"},
+                {"data": "variant"},
                 {"data": "edit"}]
         })
     }

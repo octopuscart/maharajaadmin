@@ -19,10 +19,18 @@ $this->load->view('layout/topmenu');
 </style>
 <!-- Main content -->
 <section class="content" ng-controller="productController">
-    <div class="well well-sm">
-                <a class="btn btn-success btn-lg" href="<?php echo site_url('ProductManager/add_product')?>">Add New Product</a>
+    <?php
+    if ($vproduct) {
+        ?>
+        <div class="well well-sm">
+            <b>Primary Product: <?php echo $vproduct["title"]; ?></b>
+            <h3><?php echo $vproduct["sku"]; ?></h3>
+        </div>
+        <?php
+    }
+    ?>
 
-    </div>
+
     <div class="">
         <div class="panel panel-inverse">
             <div class="panel-heading">
@@ -49,9 +57,10 @@ $this->load->view('layout/topmenu');
                         <input type="hidden" name="category_name" id="category_id" value="<?php echo $product_obj->category_id; ?>">
 
                     </div>
-                    <div class="form-group">
-                        <label for="exampleInputPassword1">Description</label>
-                        <textarea class="form-control"  name="description" style="height:100px"><?php echo $product_obj->description; ?></textarea>
+
+                    <div class="form-group" >
+                        <label >Size/Weight/Quantity/Pc</label>
+                        <input type="text" class="form-control " name="description"  aria-describedby="emailHelp" placeholder="" value="<?php echo $product_obj->description; ?>" style="width: 200px;"  />
                     </div>
 
 
@@ -214,7 +223,27 @@ $this->load->view('layout/topmenu');
             </div>
         </div>
 
+        <div class="well well-sm">
+            <?php
+            if (!$product_obj->variant_product_of) {
+                ?>
+                <a class="btn btn-warning btn-lg" href="<?php echo site_url('ProductManager/variant_product/' . $product_obj->id) ?>">Add Variant Product</a>
+                <button class="btn btn-danger btn-lg pull-right"  data-toggle="modal" data-target="#variant_product_model">Make as Variant Product</button>
 
+                <?php
+            }
+            ?>
+            <?php
+            if ($product_obj->variant_product_of) {
+                ?>
+
+                <a class="btn btn-warning btn-lg" href="<?php echo site_url('ProductManager/variant_product/' . $product_obj->variant_product_of) ?>">Add More Variant Product</a>
+                                <button class="btn btn-danger btn-lg pull-right"  data-toggle="modal" data-target="#primary_product_model">Make as Primary Product</button>
+
+                    <?php
+            }
+            ?>
+        </div>
     </div>
 
     <!-- Modal -->
@@ -235,14 +264,113 @@ $this->load->view('layout/topmenu');
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade " id="variant_product_model">
+        <div class="modal-dialog modal-sm" role="document">
+            <form action="" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Enter Primary Product SKU</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
 
+                            <input type="text" class="form-control price_tag_text" id='sky_vrt' name="variant_product_of"   aria-describedby="emailHelp" placeholder="" value="">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger" name="make_variant_product" value="make_variant_product">Submit</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="modal fade " id="primary_product_model">
+        <div class="modal-dialog modal-sm" role="document">
+            <form action="" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Make Primary Product </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            It will be a Primary Product, If this product has no variants then It will be listed as separate product.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger" name="make_primary_product" value="make_variant_product">Confirm</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="panel panel-inverse">
+        <div class="panel-heading">
+            <h3 class="panel-title">Product Reports <?php echo $title; ?></h3>
+        </div>
+        <div class="panel-body">
+            <table id="tableData" class="table table-bordered ">
+                <thead>
+                    <tr>
+                        <th style="width: 20px;">S.N.</th>
+                        <th style="width:50px;">Image</th>
+                        <th style="width:50px;">SKU</th>
+                        <th style="width:100px;">Title</th>
+                        <th style="width:100px;">Size/Qnty.</th>
+                        <th style="width:50px;">Items Prices</th>
+                        <th style="width:50px;">Stock</th>
+                        <th style="width:100px;">Variant Product Of</th>
+                        <th style="width: 75px;">Edit</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </section>
 <!-- end col-6 -->
 
+<link href="<?php echo base_url(); ?>assets/plugins/DataTables/css/data-table.css" rel="stylesheet" />
 
+<script src="<?php echo base_url(); ?>assets/plugins/DataTables/js/jquery.dataTables.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/table-manage-default.demo.min.js"></script>
+<?php
+$primaryProduct = $product_obj->id;
+if ($product_obj->variant_product_of) {
+    $primaryProduct = $product_obj->variant_product_of;
+}
+?>
+<script>
+                            $(function () {
 
+                                $('#tableData').DataTable({
+                                    "processing": true,
+                                    "serverSide": true,
+                                    "ajax": {
+                                        url: "<?php echo site_url("ProductManager/productReportApi/" . $condition . '/' . $primaryProduct) ?>",
+                                        type: 'GET'
+                                    },
+                                    "columns": [
+                                        {"data": "s_n"},
+                                        {"data": "image"},
+                                        {"data": "sku"},
+                                        {"data": "title"},
+                                        {"data": 'description'},
+                                        {"data": "items_prices"},
+                                        {"data": "stock_status"},
+                                        {"data": "variant"},
+                                        {"data": "edit"}]
+                                })
+                            }
+                            )
 
-
+</script>
 
 
 

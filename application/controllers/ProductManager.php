@@ -51,7 +51,7 @@ class ProductManager extends CI_Controller {
     }
 
     //Add Categories
-       //Add Categories
+    //Add Categories
     function categories() {
         $product_model = $this->Product_model;
         $data['product_model'] = $product_model;
@@ -135,10 +135,8 @@ class ProductManager extends CI_Controller {
         $image_list = $query->result();
         $data['images'] = $image_list;
 
-
         $this->load->view('productManager/categories', $data);
     }
-
 
     //Add Categories
     function categoryItems() {
@@ -146,13 +144,11 @@ class ProductManager extends CI_Controller {
 
         $data['category_items'] = $this->Product_model->category_items_prices();
 
-
         $query = $this->db->get('custome_items');
         $data['custome_items'] = $query->result();
 
         $query = $this->db->get('custome_items_price');
         $data['custome_items_price'] = $query->result();
-
 
         if (isset($_POST['delete_category'])) {
             $this->db->where('id', $this->input->post('category_id'));
@@ -208,9 +204,6 @@ class ProductManager extends CI_Controller {
                     $this->db->insert('custome_items_price', $category_item_price);
                 }
                 redirect('ProductManager/categoryItems');
-
-
-
 
 //                $category_array = array(
 //                    'category_name' => $this->input->post('category_name'),
@@ -406,13 +399,10 @@ class ProductManager extends CI_Controller {
 
         $data['product_detail_attrs'] = $product_model->productAttributes($product_id);
 
-
-
         $this->db->select('*');
         $this->db->where('id', $product_id);
         $query = $this->db->get('products');
         $productobj = $query->row();
-
 
         if ($productobj) {
             $data['product_obj'] = $productobj;
@@ -420,7 +410,8 @@ class ProductManager extends CI_Controller {
             redirect('ProductManager/productReport');
         }
         $vproduct_id = $product_id;
-
+        $vproduct = $this->productDetails($productobj->variant_product_of);
+        $data['vproduct'] = $vproduct;
 
         $categorystr = $this->Product_model->parent_get($productobj->category_id);
         $categorylist = $categorystr['category_array'];
@@ -448,6 +439,29 @@ class ProductManager extends CI_Controller {
             $this->db->delete('products'); //
             redirect("ProductManager/productReport");
         }
+        if (isset($_POST['make_variant_product'])) {
+            $vrbProductsku = $this->input->post("variant_product_of");
+            $primaryProduct = $this->productDetailsSku($vrbProductsku);
+
+            if ($primaryProduct) {
+                $varient_product_id = $primaryProduct["id"];
+                $this->db->set('variant_product_of', $varient_product_id);
+                $this->db->where('id', $product_id); //set column_name and value in which row need to update
+                $this->db->update('products'); ///
+            }
+            redirect('ProductManager/edit_product/' . $product_id);
+        }
+
+        if (isset($_POST['make_primary_product'])) {
+
+
+            $this->db->set('variant_product_of', "");
+            $this->db->where('id', $product_id); //set column_name and value in which row need to update
+            $this->db->update('products'); ///
+
+            redirect('ProductManager/edit_product/' . $product_id);
+        }
+
 
 
         //end of new attr
@@ -579,7 +593,8 @@ class ProductManager extends CI_Controller {
             redirect('ProductManager/edit_product/' . $product_id);
         }
         //remove of realted products
-
+        $data['condition'] = 'stockin';
+        $data['title'] = '';
         $this->load->view('productManager/editProducts', $data);
     }
 
@@ -592,12 +607,39 @@ class ProductManager extends CI_Controller {
         $product['variant_product_of'] = $product_id;
         $this->db->insert('products', $product);
         $last_id = $this->db->insert_id();
-        $sku = "CAS" . $user_id . $last_id;
-        $this->db->set('sku', $sku);
+        $sku = "MM" . $user_id . $last_id;
+        $this->db->set(array('sku' => $sku,
+            "description" => "",
+            "price" => "",
+            "regular_price" => "",
+            "status" => "0",
+            "sale_price" => ""));
         $this->db->where('id', $last_id); //set column_name and value in which row need to update
         $this->db->update('products');
 
         redirect('ProductManager/edit_product/' . $last_id);
+    }
+
+    function productDetails($product_id) {
+        $this->db->where('id', $product_id);
+        $query = $this->db->get('products');
+        $product = $query->row_array();
+        if ($product) {
+            return $product;
+        } else {
+            return false;
+        }
+    }
+
+    function productDetailsSku($product_sku) {
+        $this->db->where('sku', $product_sku);
+        $query = $this->db->get('products');
+        $product = $query->row_array();
+        if ($product) {
+            return $product;
+        } else {
+            return false;
+        }
     }
 
     function productReport() {
@@ -629,7 +671,7 @@ class ProductManager extends CI_Controller {
     }
 
     //Product API for data Table
-    public function productReportApi($condition) {
+    public function productReportApi($condition, $variant_of = "") {
         $draw = intval($this->input->get("draw"));
         $start = intval($this->input->get("start"));
         $length = intval($this->input->get("length"));
@@ -652,27 +694,27 @@ class ProductManager extends CI_Controller {
             default:
                 $editionalquery = " where p.stock_status = 'In Stock' and p.status = '1'";
         }
+        $variant_query = "";
+        if ($variant_of) {
+            $variant_query = " and (p.variant_product_of = '$variant_of' or  p.id = '$variant_of')";
+        }
 
 
         $product_model = $this->Product_model;
         $data['product_model'] = $product_model;
 
-        $query = "select p.* from products as p $editionalquery  $searchqry  order by id desc ";
+        $query = "select p.* from products as p $editionalquery  $searchqry  $variant_query order by id desc ";
         $query1 = $this->db->query($query);
         $productslistcount = $query1->result_array();
 
-        $query = "select p.* from products as p $editionalquery $searchqry  order by id  limit  $start, $length";
+        $query = "select p.* from products as p $editionalquery $searchqry $variant_query  order by id  limit  $start, $length";
         $query2 = $this->db->query($query);
         $productslist = $query2->result_array();
-
-
-
 
         $return_array = array();
         foreach ($productslist as $pkey => $pvalue) {
             $temparray = array();
             $temparray['s_n'] = $pkey + 1;
-
 
             $imageurl = base_url() . "assets/default/default.png";
             if ($pvalue['file_name']) {
@@ -684,11 +726,14 @@ class ProductManager extends CI_Controller {
             $temparray['sku'] = $pvalue['sku'];
             $temparray['title'] = $pvalue['title'];
             $temparray['short_description'] = $pvalue['short_description'];
+            $temparray['description'] = $pvalue['description'];
             $catarray = $this->Product_model->parent_get($pvalue['category_id']);
             $temparray['category'] = $catarray['category_string'];
             $temparray['items_prices'] = $pvalue['price'];
+            $vproduct = $this->productDetails($pvalue['variant_product_of']);
+            $temparray['variant'] = $vproduct ? "<div class='variant_product product_type'>" . $vproduct['sku'] . "</div>" : "<div class='primary_product product_type'>PRIMARY</div>";
             $temparray['stock_status'] = $pvalue['stock_status'];
-            $temparray['edit'] = '<a href="' . site_url('ProductManager/edit_product/' . $pvalue['id']) . '" class="btn btn-danger"><i class="fa fa-edit"></i> Edit</a>';
+            $temparray['edit'] = '<a href="' . site_url('ProductManager/edit_product/' . $pvalue['id']) . '" class="btn btn-danger" ' . (!$variant_of ? ' target="_blank"' : "") . '><i class="fa fa-edit"></i> Edit</a>';
 
             array_push($return_array, $temparray);
         }
@@ -735,7 +780,6 @@ class ProductManager extends CI_Controller {
                 'link' => $this->input->post('link'),
                 'link_text' => $this->input->post('link_text'),
                 'file_name' => $file_newname);
-
 
             $this->db->insert('sliders', $post_data);
             $last_id = $this->db->insert_id();
@@ -840,7 +884,6 @@ class ProductManager extends CI_Controller {
         $colorslist = $query->result();
         $data['colorslist'] = $colorslist;
 
-
         $product_model = $this->Product_model;
         $data['product_model'] = $product_model;
 
@@ -851,7 +894,7 @@ class ProductManager extends CI_Controller {
         $querydata = $this->db->get("product_import");
         $resultdata = $querydata->result_array();
         foreach ($resultdata as $ikey => $ivalue) {
-                print_r($ivalue["sku"]);
+            print_r($ivalue["sku"]);
             echo "<br/>";
             $this->db->where("sku", $ivalue["sku"]);
             $this->db->set(array("video_link" => $ivalue["status"]));
@@ -864,8 +907,6 @@ class ProductManager extends CI_Controller {
 //                $this->db->set(array("status" => "0"));
 //                $this->db->update("products");
 //            }
-            
-            
 //            if ($ivalue["status"] == "out of stock") {
 //                print_r($ivalue["sku"]);
 //                echo "<br/>";
@@ -873,7 +914,6 @@ class ProductManager extends CI_Controller {
 //                $this->db->set(array("stock_status" => "Out Of Stock"));
 //                $this->db->update("products");
 //            }            
-            
         }
     }
 
